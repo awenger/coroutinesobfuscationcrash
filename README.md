@@ -3,6 +3,7 @@
 - kotlin version 1.3.40
 - coroutines version 1.2.1
 - android build tool version 3.3.2
+- reported here: https://github.com/Kotlin/kotlinx.coroutines/issues/1288
 
 ## Setup:
 
