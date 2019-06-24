@@ -8,6 +8,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.channels.actor
 import java.io.IOException
+import kotlin.coroutines.resumeWithException
 
 class MainActivity : AppCompatActivity() {
 
@@ -36,8 +37,8 @@ class MainActivity : AppCompatActivity() {
 
     private suspend fun call() = try {
         coroutineScope {
-            val result1 = async { retrieve() }
-            val result2 = async { retrieve() }
+            val result1 = async(start = CoroutineStart.LAZY) { retrieve("A1", false) }
+            val result2 = async(start = CoroutineStart.LAZY) { retrieve("A2", true) }
             listOf(result1, result2).awaitAll()
             Log.d(LOG_TAG, "all successful retrieved")
             true
@@ -47,11 +48,18 @@ class MainActivity : AppCompatActivity() {
         false
     }
 
-    @Throws(IOException::class)
-    private suspend fun retrieve() {
-        delay(100)
-        Log.d(LOG_TAG, "waited for 100ms, throwing IOException")
-        throw IOException("could not contact server")
+    private suspend fun retrieve(tag: String, fail: Boolean): String {
+        return suspendCancellableCoroutine {
+            it.invokeOnCancellation { Log.d(tag, "invoke on cancellation") }
+            if (fail) {
+                Thread.sleep(10)
+                Log.d(tag, "failing with IOException")
+                it.resumeWithException(IOException("failed"))
+            } else {
+                Thread.sleep(10)
+                it.resume("abc") { Log.d(tag, "cancel during on resume with $it") }
+            }
+        }
     }
 
     companion object {
