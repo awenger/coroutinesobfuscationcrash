@@ -39,7 +39,7 @@ class MainActivity : AppCompatActivity() {
         coroutineScope {
             val result1 = async(start = CoroutineStart.LAZY) { retrieve("A1", false) }
             val result2 = async(start = CoroutineStart.LAZY) { retrieve("A2", true) }
-            listOf(result1, result2).awaitAll()
+            listOf(result1, result2).awaitAll() // replace the .awaitAll() with prevents the crash .forEach { it.await() }
             Log.d(LOG_TAG, "all successful retrieved")
             true
         }
